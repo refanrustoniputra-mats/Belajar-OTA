@@ -12,7 +12,7 @@ const char* versionURL  = "https://raw.githubusercontent.com/refanrustoniputra-m
 const char* firmwareURL = "https://raw.githubusercontent.com/refanrustoniputra-mats/Belajar-OTA/main/firmware.bin";
 
 const unsigned long INTERVAL_CEK_UPDATE = 10UL * 60UL * 1000UL;
-const unsigned long INTERVAL_BACA_SENSOR = 5UL * 1000UL; // baca sensor tiap 5 detik
+const unsigned long INTERVAL_BACA_SENSOR = 5UL * 1000UL;
 // ---------------------------
 
 unsigned long waktuTerakhirCek = 0;
@@ -39,20 +39,18 @@ void setup() {
   Serial.print("Versi firmware saat ini: ");
   Serial.println(FIRMWARE_VERSION);
 
-  randomSeed(analogRead(0)); // biar angka dummy nya beda-beda tiap boot
+  randomSeed(analogRead(0));
 
   cekVersiTerbaru();
   waktuTerakhirCek = millis();
 }
 
 void loop() {
-  // ---- BACA SENSOR (DUMMY) ----
   if (millis() - waktuTerakhirBaca >= INTERVAL_BACA_SENSOR) {
     waktuTerakhirBaca = millis();
     bacaSensor();
   }
 
-  // ---- CEK UPDATE BERKALA ----
   if (millis() - waktuTerakhirCek >= INTERVAL_CEK_UPDATE) {
     waktuTerakhirCek = millis();
     if (WiFi.status() == WL_CONNECTED) {
@@ -64,8 +62,9 @@ void loop() {
 }
 
 void bacaSensor() {
-  float suhu = random(200, 350) / 10.0;       // dummy: 20.0 - 35.0 °C
-  float kelembapan = random(400, 900) / 10.0; // dummy: 40.0 - 90.0 %
+  float suhu = random(200, 350) / 10.0;
+  float kelembapan = random(400, 900) / 10.0;
+  int cahaya = random(0, 1024); // dummy sensor cahaya (LDR), nilai ADC 0-1023
 
   Serial.println("---- Data Sensor ----");
   Serial.print("Suhu       : ");
@@ -74,6 +73,15 @@ void bacaSensor() {
   Serial.print("Kelembapan : ");
   Serial.print(kelembapan);
   Serial.println(" %");
+  Serial.print("Cahaya     : ");
+  Serial.print(cahaya);
+  Serial.println(" (nilai ADC)");
+
+  if (cahaya < 300) {
+    Serial.println("Kondisi    : Gelap");
+  } else {
+    Serial.println("Kondisi    : Terang");
+  }
   Serial.println("----------------------");
 }
 
