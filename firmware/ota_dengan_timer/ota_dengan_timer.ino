@@ -4,7 +4,7 @@
 #include <WiFiClientSecure.h>
 #include "version.h"
 
-// ---- GANTI BAGIAN INI -----
+// ---- GANTI BAGIAN INI ----
 const char* ssid     = "MAKER 2026";
 const char* password = "Makerdotindo2026";
 
@@ -64,23 +64,31 @@ void loop() {
 void bacaSensor() {
   float suhu = random(200, 350) / 10.0;
   float kelembapan = random(400, 900) / 10.0;
-  int cahaya = random(0, 1024); // dummy sensor cahaya (LDR), nilai ADC 0-1023
+  int cahaya = random(0, 1024);
+  int kualitasUdara = random(50, 500); // dummy MQ-135, satuan ppm CO2-equivalent
 
   Serial.println("---- Data Sensor ----");
-  Serial.print("Suhu       : ");
+  Serial.print("Suhu          : ");
   Serial.print(suhu);
   Serial.println(" °C");
-  Serial.print("Kelembapan : ");
+  Serial.print("Kelembapan    : ");
   Serial.print(kelembapan);
   Serial.println(" %");
-  Serial.print("Cahaya     : ");
+  Serial.print("Cahaya        : ");
   Serial.print(cahaya);
   Serial.println(" (nilai ADC)");
+  Serial.print("Kondisi cahaya: ");
+  Serial.println(cahaya < 300 ? "Gelap" : "Terang");
+  Serial.print("Kualitas udara: ");
+  Serial.print(kualitasUdara);
+  Serial.println(" ppm");
 
-  if (cahaya < 300) {
-    Serial.println("Kondisi    : Gelap");
+  if (kualitasUdara > 350) {
+    Serial.println("Status udara  : Buruk, perlu ventilasi!");
+  } else if (kualitasUdara > 150) {
+    Serial.println("Status udara  : Sedang");
   } else {
-    Serial.println("Kondisi    : Terang");
+    Serial.println("Status udara  : Baik");
   }
   Serial.println("----------------------");
 }
