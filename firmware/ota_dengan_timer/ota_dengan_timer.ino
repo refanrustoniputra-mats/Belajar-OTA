@@ -2,7 +2,7 @@
 #include <HTTPClient.h>
 #include <HTTPUpdate.h>
 #include <WiFiClientSecure.h>
-#include "version.h"   // <-- FIRMWARE_VERSION di-generate otomatis oleh GitHub Actions
+#include "version.h"
 
 // ---- GANTI BAGIAN INI ----
 const char* ssid     = "MAKER 2026";
@@ -11,11 +11,12 @@ const char* password = "Makerdotindo2026";
 const char* versionURL  = "https://raw.githubusercontent.com/refanrustoniputra-mats/Belajar-OTA/main/version.txt";
 const char* firmwareURL = "https://raw.githubusercontent.com/refanrustoniputra-mats/Belajar-OTA/main/firmware.bin";
 
-// Interval cek update (dalam milidetik). Contoh: 10 menit = 10 * 60 * 1000
 const unsigned long INTERVAL_CEK_UPDATE = 10UL * 60UL * 1000UL;
+const unsigned long INTERVAL_BACA_SENSOR = 5UL * 1000UL; // baca sensor tiap 5 detik
 // ---------------------------
 
 unsigned long waktuTerakhirCek = 0;
+unsigned long waktuTerakhirBaca = 0;
 
 void setup() {
   Serial.begin(115200);
@@ -38,18 +39,22 @@ void setup() {
   Serial.print("Versi firmware saat ini: ");
   Serial.println(FIRMWARE_VERSION);
 
+  randomSeed(analogRead(0)); // biar angka dummy nya beda-beda tiap boot
+
   cekVersiTerbaru();
   waktuTerakhirCek = millis();
 }
 
 void loop() {
-  // ---- KODE PROGRAM UTAMA ALAT KAMU DI SINI ----
+  // ---- BACA SENSOR (DUMMY) ----
+  if (millis() - waktuTerakhirBaca >= INTERVAL_BACA_SENSOR) {
+    waktuTerakhirBaca = millis();
+    bacaSensor();
+  }
 
-
-  // ---- BAGIAN CEK UPDATE BERKALA (jangan dihapus) ----
+  // ---- CEK UPDATE BERKALA ----
   if (millis() - waktuTerakhirCek >= INTERVAL_CEK_UPDATE) {
     waktuTerakhirCek = millis();
-
     if (WiFi.status() == WL_CONNECTED) {
       cekVersiTerbaru();
     } else {
@@ -58,9 +63,22 @@ void loop() {
   }
 }
 
+void bacaSensor() {
+  float suhu = random(200, 350) / 10.0;       // dummy: 20.0 - 35.0 °C
+  float kelembapan = random(400, 900) / 10.0; // dummy: 40.0 - 90.0 %
+
+  Serial.println("---- Data Sensor ----");
+  Serial.print("Suhu       : ");
+  Serial.print(suhu);
+  Serial.println(" °C");
+  Serial.print("Kelembapan : ");
+  Serial.print(kelembapan);
+  Serial.println(" %");
+  Serial.println("----------------------");
+}
+
 void cekVersiTerbaru() {
   Serial.println("Mengecek versi terbaru di GitHub...");
-
   WiFiClientSecure client;
   client.setInsecure();
 
@@ -71,7 +89,6 @@ void cekVersiTerbaru() {
   if (httpCode == 200) {
     String versiTerbaru = http.getString();
     versiTerbaru.trim();
-
     Serial.print("Versi terbaru di GitHub: ");
     Serial.println(versiTerbaru);
 
@@ -93,9 +110,7 @@ void cekVersiTerbaru() {
 void lakukanUpdate() {
   WiFiClientSecure client;
   client.setInsecure();
-
   Serial.println("Mendownload firmware.bin...");
-
   httpUpdate.rebootOnUpdate(true);
 
   t_httpUpdate_return hasil = httpUpdate.update(client, firmwareURL);
@@ -106,11 +121,9 @@ void lakukanUpdate() {
                     httpUpdate.getLastError(),
                     httpUpdate.getLastErrorString().c_str());
       break;
-
     case HTTP_UPDATE_NO_UPDATES:
       Serial.println("Tidak ada update (harusnya tidak sampai sini).");
       break;
-
     case HTTP_UPDATE_OK:
       Serial.println("Update BERHASIL! ESP32 akan restart...");
       break;
