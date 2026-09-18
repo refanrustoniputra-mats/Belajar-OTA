@@ -4,7 +4,7 @@
 #include <WiFiClientSecure.h>
 #include "version.h"
 
-// ---- GANTI BAGIAN INI -----
+// ---- GANTI BAGIAN INI ------
 const char* ssid     = "MAKER 2026";
 const char* password = "Makerdotindo2026";
 
