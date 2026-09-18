@@ -8,7 +8,7 @@ on:
       - 'VERSION'
       - '.github/workflows/build.yml'
 
-# Supaya workflow boleh commit balik ke repo
+# Supaya workflow boleh commit balik ke repoo
 permissions:
   contents: write
 
