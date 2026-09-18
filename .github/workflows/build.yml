@@ -40,7 +40,7 @@ jobs:
       - name: Compile firmware
         run: |
           arduino-cli compile \
-            --fqbn esp32:esp32:esp32 \
+            --fqbn esp32:esp32:esp32s3 \
             --output-dir build \
             firmware/ota_dengan_timer
 
